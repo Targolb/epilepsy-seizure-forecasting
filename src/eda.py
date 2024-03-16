@@ -1,31 +1,35 @@
-import os
 import numpy as np
+import matplotlib.pyplot as plt
+import os
 
-# Define the base path where the data is stored
-DATA_PATH = '/home/targol/EpilepticSeizur/data/chb01'
+# Load the balanced datasets
+pre_seizure_data = np.load('/home/targol/EpilepticSeizur/data/balanced_pre_seizure.npy')
+non_seizure_data = np.load('/home/targol/EpilepticSeizur/data/balanced_non_seizure.npy')
 
-# List all .npy files in the data directory
-data_files = [file for file in os.listdir(DATA_PATH) if file.endswith('.npy')]
+# Dimensionality check
+print(f"Pre-seizure data shape: {pre_seizure_data.shape}")
+print(f"Non-seizure data shape: {non_seizure_data.shape}")
 
-# Check existence
-if not data_files:
-    print("No data files found.")
-else:
-    print(f"Total data files found: {len(data_files)}")
+# Ensure the plots directory exists
+plots_dir = '/home/targol/EpilepticSeizur/data/plots'
+os.makedirs(plots_dir, exist_ok=True)
 
-# Load a few segments for data integrity check
-sample_files = data_files[:5]  # Check the first 5 files
-for file in sample_files:
-    file_path = os.path.join(DATA_PATH, file)
-    data = np.load(file_path)
-    print(f"File: {file}, Shape: {data.shape}")
+# Visual inspection of a few segments
+fig, axs = plt.subplots(2, 2, figsize=(15, 10))
+axs[0, 0].plot(pre_seizure_data[0][0])  # Adjust indexing based on your data structure
+axs[0, 0].set_title('Pre-Seizure Segment 1')
+axs[0, 1].plot(pre_seizure_data[1][0])  # Adjust indexing
+axs[0, 1].set_title('Pre-Seizure Segment 2')
+axs[1, 0].plot(non_seizure_data[0][0])  # Adjust indexing
+axs[1, 0].set_title('Non-Seizure Segment 1')
+axs[1, 1].plot(non_seizure_data[1][0])  # Adjust indexing
+axs[1, 1].set_title('Non-Seizure Segment 2')
+plt.savefig(os.path.join(plots_dir, 'segment_visualization.png'))
 
-    # Statistical summary for the first EEG channel
-    if data.ndim == 2:  # Ensure data is 2D (channels x samples)
-        first_channel_data = data[0, :]
-        mean_val = np.mean(first_channel_data)
-        std_dev = np.std(first_channel_data)
-        min_val = np.min(first_channel_data)
-        max_val = np.max(first_channel_data)
-        print(f"Statistics for the first channel of {file}:")
-        print(f"Mean: {mean_val:.2f}, Std Dev: {std_dev:.2f}, Min: {min_val:.2f}, Max: {max_val:.2f}\n")
+# Distribution analysis (example)
+plt.figure(figsize=(10, 6))
+plt.hist(pre_seizure_data.flatten(), bins=50, alpha=0.5, label='Pre-Seizure')
+plt.hist(non_seizure_data.flatten(), bins=50, alpha=0.5, label='Non-Seizure')
+plt.legend()
+plt.title('Value Distribution')
+plt.savefig(os.path.join(plots_dir, 'value_distribution.png'))
